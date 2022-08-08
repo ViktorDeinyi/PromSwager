@@ -2,13 +2,10 @@ swagger: '2.0'
 info:
   description: Публичное API позволяет компаниям, зарегистрированным на портале получать удаленный доступ к управлению данными в Кабинете компании через свой собственный программный интерфейс.
   version: 1.0.0
-  title: 'It's Britney b**ch'
+  title: It's Britney b**ch
 schemes:
   - https
 host: my.prom.ua/api/v1
-basePath: /api/v1
-produces:
-  - application/json
 tags:
   - name: Orders
     description: (операции с заказами)

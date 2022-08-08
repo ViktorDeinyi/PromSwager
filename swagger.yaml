@@ -1,711 +1,1525 @@
----
-swagger: "2.0"
+swagger: '2.0'
 info:
-  description: "Our prom.ua api.  You can find out more about\
-    \ Swagger at [http://swagger.io](http://swagger.io) or on [irc.freenode.net, #swagger](http://swagger.io/irc/).\
-    \  For this sample, you can use the api key `special-key` to test the authorization\
-    \ filters."
-  version: "1.0.5"
-  title: "It is britney B**ch"
-host: "my.prom.ua/api/v1"
-tags:
-- name: "pet"
-  description: "Everything about your Pets"
-  externalDocs:
-    description: "Find out more"
-    url: "http://swagger.io"
-- name: "store"
-  description: "Access to Petstore orders"
-- name: "user"
-  description: "Operations about user"
-  externalDocs:
-    description: "Find out more about our store"
-    url: "http://swagger.io"
+  title: 'It's Britney b**ch'
+  description: <p>Публичное API позволяет компаниям, зарегистрированным на портале получать удаленный доступ к управлению данными в Кабинете компании через свой собственный программный интерфейс.</p> <h2>Версия API</h2> <p>Документация по публичному API {{DOMAIN}} версии 1.0 (закрытый бета-тест для ограниченного количества компаний). Мы будем рады получить от компаний, использующих это API обратную связь с замечаниями по его использованию и пожеланиями по улучшению функциональности. Просьба отправлять обратную связь на email api@{{DOMAIN}}</p> <h2>Что может публичное API?</h2> <p>Воспользовавшись инструментами публичного API вы сможете:</p> <ul> <li>Выгружать в свою систему информацию о своих заказах и менять статусы заказов в Кабинете компании.</li> <li>Выгружать информацию о сообщениях и менять статусы сообщений в Кабинете компании, а также отправлять покупателю ответ на его сообщение через Кабинет компании.</li> <li>Получать информацию о клиентах.</li> <li>Получать информацию о своих товарах, а также менять информацю о товарах в Кабинете компании.</li> </ul> <h2>Как получить доступ к работе с API?</h2> <p>Для того, чтобы начать работать через публичное API вам необходимо получить у сотрудника портала собственный уникальный ключ (токен). Все запросы через API выполняются с использованием этого уникального ключа, который является идентификатором вашей компании. Храните его в безопасности.</p> <h2>Формат отправки запроса к API</h2> <p>Для отправки или получения информации через публичное API необходимо сформировать соответствующий HTTP-заголовок, который должен передаваться при каждом запросе к API.</p> <p>Пример такого заголовка:</p> <p><i>`Authorization`:` Bearer 19efbdc8ee723b7eb9e6dae1f7a20ca4378b288c`</i></p> <p>где `19efbdc8ee723b7eb9e6dae1f7a20ca4378b288c` - ваш уникальный ключ (токен) авторизации.</p> <p>Пример запроса:</p> <p><i>`https://my.{{DOMAIN}}/api/v1/products/list?limit=5`</i></p> <h2>Тестирование (песочница)</h2> <p>Рекомендуем вам перед началом работы с API на реальной компании провести предварительное тестирование. Для этого зарегистрируйте на портале новую компанию и сообщите менеджеру вашей компании ее ID, после чего мы вышлем вам уникальный ключ для доступа к Кабинету этой компании через API. Вы сможете протестировать работу с API на данной компании в течение срока действия тестового периода (тестовый период автоматически активируется на 14 дней).</p> <h2>Вопросы безопасности</h2> <p> <ul> <li>Работа через API происходит в режиме безопасного соединения https.</li> <li>Не передавайте никому ваш ключ доступа к API. Чтобы аннулировать ключ, необходимо изменить пароль владельца Кабинета компании и запросить у сотрудника портала новый ключ. В этом случае случае старый ключ (все старые ключи) станет недействительным.</li> <li>Все действия через API автоматически логируются, что обеспечивает высокий уровень сохранности вашей информации.</li> </ul> </p> <h1 style='text-align:center'>Примеры использования API:</h1> <p> <a href='https://github.com/evo-company/company-api-example/blob/master/python/api_python2-7_example.py'>Python2.7</a> </p> <p> <a href='https://github.com/evo-company/company-api-example/blob/master/python/api_python3-5_example.py'>Python3.5</a> </p> <p> <a href='https://github.com/evo-company/company-api-example/blob/master/node.js/EvoExampleAPI.js'>Node.js</a> </p> <p> <a href='https://github.com/evo-company/company-api-example/blob/master/php/api_php_example.php'>PHP</a> </p> <p> <a href='https://github.com/evo-company/company-api-example/blob/master/java/EvoClientExample.java'>Java</a> </p> <h1 style='text-align:center'>Доступные методы API:</h1>
+  version: 1.0.0
 schemes:
-- "https"
-- "http"
+  - https
+host:"my.prom.ua/api/v1"
+basePath: /api/v1
+produces:
+  - application/json
+tags:
+  - name: Orders
+    description: (операции с заказами)
+  - name: Products
+    description: (операции с продуктами)
+  - name: Clients
+    description: (операции с клиентами)
+  - name: Messages
+    description: (операции c сообщениями)
+  - name: Groups
+    description: (операции c группами)
+  - name: PaymentOption
+    description: (операции со способами оплат)
+  - name: Delivery
+    description: (операции со способами доставок)
 paths:
-  /pet/{petId}/uploadImage:
+  /orders/list:
+    get:
+      summary: Список заказов компании
+      description: |
+        Список заказов компании с подробной информацией о клиенте, адресе и способе доставки.
+      parameters:
+        - name: status
+          in: query
+          description: Статус заказа.
+          required: false
+          type: string
+        - name: date_from
+          in: query
+          description: Запрос заказов, созданных после указанной даты. Пример - "2015-04-28T12:50:34".
+          required: false
+          type: string
+        - name: date_to
+          in: query
+          description: Запрос заказов, созданных до указанной даты. Пример - "2015-04-28T12:50:34".
+          required: false
+          type: string
+        - name: limit
+          in: query
+          description: Ограничение количества заказов в ответе.
+          required: false
+          type: integer
+          format: int64
+        - name: last_id
+          in: query
+          description: Ограничить выборку заказами с идентификаторами не выше указанного.
+          required: false
+          type: integer
+          format: int64
+      tags:
+        - Orders
+      responses:
+        '200':
+          description: Список заказов
+          schema:
+            type: object
+            properties:
+              orders:
+                type: array
+                items:
+                  $ref: '#/definitions/Order'
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /orders/{id}:
+    get:
+      summary: Информация о заказе
+      description: |
+        Информация о заказе с указанным идентификатором.
+      parameters:
+        - name: id
+          in: path
+          description: Уникальный идентификатор заказа.
+          required: true
+          type: integer
+          format: int64
+      tags:
+        - Orders
+      responses:
+        '200':
+          description: Информация о заказе
+          schema:
+            type: object
+            properties:
+              order:
+                $ref: '#/definitions/Order'
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /orders/set_status:
     post:
-      tags:
-      - "pet"
-      summary: "uploads an image"
-      description: ""
-      operationId: "uploadFile"
-      consumes:
-      - "multipart/form-data"
-      produces:
-      - "application/json"
+      summary: Смена статуса заказа (-ов).
+      description: |
+        Изменение статуса заказов по списку уникальных идентификаторов.
       parameters:
-      - name: "petId"
-        in: "path"
-        description: "ID of pet to update"
-        required: true
-        type: "integer"
-        format: "int64"
-      - name: "additionalMetadata"
-        in: "formData"
-        description: "Additional data to pass to server"
-        required: false
-        type: "string"
-      - name: "file"
-        in: "formData"
-        description: "file to upload"
-        required: false
-        type: "file"
-      responses:
-        200:
-          description: "successful operation"
+        - name: body
+          in: body
+          description: Параметры запроса.
           schema:
-            $ref: "#/definitions/ApiResponse"
-      security:
-      - petstore_auth:
-        - "write:pets"
-        - "read:pets"
-  /pet:
+            $ref: '#/definitions/SetOrderStatus'
+      tags:
+        - Orders
+      responses:
+        '200':
+          description: Список идентификаторов обработанных заказов.
+          schema:
+            type: object
+            properties:
+              processed_ids:
+                type: array
+                items:
+                  type: integer
+                  format: int64
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /orders/refund:
     post:
-      tags:
-      - "pet"
-      summary: "Add a new pet to the store"
-      description: ""
-      operationId: "addPet"
-      consumes:
-      - "application/json"
-      - "application/xml"
-      produces:
-      - "application/json"
-      - "application/xml"
+      summary: Возврат денег покупателю
+      description: |
+        Изменение статуса заказов по списку уникальных идентификаторов.
       parameters:
-      - in: "body"
-        name: "body"
-        description: "Pet object that needs to be added to the store"
-        required: true
-        schema:
-          $ref: "#/definitions/Pet"
-      responses:
-        405:
-          description: "Invalid input"
-      security:
-      - petstore_auth:
-        - "write:pets"
-        - "read:pets"
-    put:
-      tags:
-      - "pet"
-      summary: "Update an existing pet"
-      description: ""
-      operationId: "updatePet"
-      consumes:
-      - "application/json"
-      - "application/xml"
-      produces:
-      - "application/json"
-      - "application/xml"
-      parameters:
-      - in: "body"
-        name: "body"
-        description: "Pet object that needs to be added to the store"
-        required: true
-        schema:
-          $ref: "#/definitions/Pet"
-      responses:
-        400:
-          description: "Invalid ID supplied"
-        404:
-          description: "Pet not found"
-        405:
-          description: "Validation exception"
-      security:
-      - petstore_auth:
-        - "write:pets"
-        - "read:pets"
-  /pet/findByStatus:
-    get:
-      tags:
-      - "pet"
-      summary: "Finds Pets by status"
-      description: "Multiple status values can be provided with comma separated strings"
-      operationId: "findPetsByStatus"
-      produces:
-      - "application/json"
-      - "application/xml"
-      parameters:
-      - name: "status"
-        in: "query"
-        description: "Status values that need to be considered for filter"
-        required: true
-        type: "array"
-        items:
-          type: "string"
-          enum:
-          - "available"
-          - "pending"
-          - "sold"
-          default: "available"
-        collectionFormat: "multi"
-      responses:
-        200:
-          description: "successful operation"
+        - name: body
+          in: body
+          description: Параметры запроса.
           schema:
-            type: "array"
-            items:
-              $ref: "#/definitions/Pet"
-        400:
-          description: "Invalid status value"
-      security:
-      - petstore_auth:
-        - "write:pets"
-        - "read:pets"
-  /pet/findByTags:
-    get:
+            $ref: '#/definitions/PaymentRefund'
       tags:
-      - "pet"
-      summary: "Finds Pets by tags"
-      description: "Multiple tags can be provided with comma separated strings. Use\
-        \ tag1, tag2, tag3 for testing."
-      operationId: "findPetsByTags"
-      produces:
-      - "application/json"
-      - "application/xml"
-      parameters:
-      - name: "tags"
-        in: "query"
-        description: "Tags to filter by"
-        required: true
-        type: "array"
-        items:
-          type: "string"
-        collectionFormat: "multi"
+        - Orders
       responses:
-        200:
-          description: "successful operation"
+        '200':
+          description: Список идентификаторов обработанных заказов.
           schema:
-            type: "array"
-            items:
-              $ref: "#/definitions/Pet"
-        400:
-          description: "Invalid tag value"
-      security:
-      - petstore_auth:
-        - "write:pets"
-        - "read:pets"
-      deprecated: true
-  /pet/{petId}:
+            type: object
+            properties:
+              processed_ids:
+                type: array
+                items:
+                  type: integer
+                  format: int64
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /messages/list:
     get:
-      tags:
-      - "pet"
-      summary: "Find pet by ID"
-      description: "Returns a single pet"
-      operationId: "getPetById"
-      produces:
-      - "application/json"
-      - "application/xml"
+      summary: Список сообщений компании
+      description: |
+        Список сообщений компании с полным содержимым и информацией о клиенте.
       parameters:
-      - name: "petId"
-        in: "path"
-        description: "ID of pet to return"
-        required: true
-        type: "integer"
-        format: "int64"
+        - name: status
+          in: query
+          description: Статус сообщения.
+          required: false
+          type: string
+        - name: date_from
+          in: query
+          description: Запрос сообщений, созданных после указанной даты. Пример - "2015-04-28T12:50:34".
+          required: false
+          type: string
+        - name: date_to
+          in: query
+          description: Запрос сообщений, созданных до указанной даты. Пример - "2015-04-28T12:50:34".
+          required: false
+          type: string
+        - name: limit
+          in: query
+          description: Ограничение количества сообщений в ответе.
+          required: false
+          type: integer
+          format: int64
+        - name: last_id
+          in: query
+          description: Ограничить выборку сообщений с идентификаторами не выше указанного.
+          required: false
+          type: integer
+          format: int64
+      tags:
+        - Messages
       responses:
-        200:
-          description: "successful operation"
+        '200':
+          description: Список сообщений
           schema:
-            $ref: "#/definitions/Pet"
-        400:
-          description: "Invalid ID supplied"
-        404:
-          description: "Pet not found"
-      security:
-      - api_key: []
+            type: object
+            properties:
+              messages:
+                type: array
+                items:
+                  $ref: '#/definitions/Message'
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /messages/{id}:
+    get:
+      summary: Информация о сообщении
+      description: |
+        Информация о сообщении с указанным идентификатором.
+      parameters:
+        - name: id
+          in: path
+          description: Уникальный идентификатор сообщения.
+          required: true
+          type: integer
+          format: int64
+      tags:
+        - Messages
+      responses:
+        '200':
+          description: Информация о сообщении
+          schema:
+            type: object
+            properties:
+              message:
+                $ref: '#/definitions/Message'
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /messages/set_status:
     post:
-      tags:
-      - "pet"
-      summary: "Updates a pet in the store with form data"
-      description: ""
-      operationId: "updatePetWithForm"
-      consumes:
-      - "application/x-www-form-urlencoded"
-      produces:
-      - "application/json"
-      - "application/xml"
+      summary: Смена статуса сообщения (-ий).
+      description: |
+        Изменение статуса сообщений по списку уникальных идентификаторов.
       parameters:
-      - name: "petId"
-        in: "path"
-        description: "ID of pet that needs to be updated"
-        required: true
-        type: "integer"
-        format: "int64"
-      - name: "name"
-        in: "formData"
-        description: "Updated name of the pet"
-        required: false
-        type: "string"
-      - name: "status"
-        in: "formData"
-        description: "Updated status of the pet"
-        required: false
-        type: "string"
-      responses:
-        405:
-          description: "Invalid input"
-      security:
-      - petstore_auth:
-        - "write:pets"
-        - "read:pets"
-    delete:
+        - name: body
+          in: body
+          description: Параметры запроса.
+          required: true
+          schema:
+            $ref: '#/definitions/SetMessageStatus'
       tags:
-      - "pet"
-      summary: "Deletes a pet"
-      description: ""
-      operationId: "deletePet"
-      produces:
-      - "application/json"
-      - "application/xml"
-      parameters:
-      - name: "api_key"
-        in: "header"
-        required: false
-        type: "string"
-      - name: "petId"
-        in: "path"
-        description: "Pet id to delete"
-        required: true
-        type: "integer"
-        format: "int64"
+        - Messages
       responses:
-        400:
-          description: "Invalid ID supplied"
-        404:
-          description: "Pet not found"
-      security:
-      - petstore_auth:
-        - "write:pets"
-        - "read:pets"
-  /store/order:
+        '200':
+          description: Список идентификаторов обработанных сообщений.
+          schema:
+            type: object
+            properties:
+              processed_ids:
+                type: array
+                items:
+                  type: integer
+                  format: int64
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /messages/reply:
     post:
+      summary: Ответ на сообщение.
+      description: |
+        Отправка ответа на сообщение от клиента с указанным идентификатором.
+      parameters:
+        - name: body
+          in: body
+          description: Параметры запроса.
+          schema:
+            $ref: '#/definitions/MessageReply'
       tags:
-      - "store"
-      summary: "Place an order for a pet"
-      description: ""
-      operationId: "placeOrder"
+        - Messages
+      responses:
+        '200':
+          description: Идентификатор сообщения, на которое был отправлен ответ.
+          schema:
+            type: object
+            properties:
+              processed_id:
+                type: integer
+                format: int64
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /clients/list:
+    get:
+      summary: Список клиентов компании
+      description: |
+        Список клиентов компании с детальной информацией и контактами.
+      parameters:
+        - name: limit
+          in: query
+          description: Ограничение количества клиентов в ответе.
+          required: false
+          type: integer
+          format: int64
+        - name: last_id
+          in: query
+          description: Ограничить выборку клиентов с идентификаторами не выше указанного.
+          required: false
+          type: integer
+          format: int64
+        - name: search_term
+          in: query
+          description: Поисковый запрос (например может содержать имя, номер телефона или email).
+          required: false
+          type: string
+      tags:
+        - Clients
+      responses:
+        '200':
+          description: Список клиентов
+          schema:
+            type: object
+            properties:
+              clients:
+                type: array
+                items:
+                  $ref: '#/definitions/Client'
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /clients/{id}:
+    get:
+      summary: Информация о клиенте
+      description: |
+        Информация о клиенте с указанным идентификатором.
+      parameters:
+        - name: id
+          in: path
+          description: Уникальный идентификатор клиента.
+          required: true
+          type: integer
+          format: int64
+      tags:
+        - Clients
+      responses:
+        '200':
+          description: Информация о клиенте
+          schema:
+            type: object
+            properties:
+              client:
+                $ref: '#/definitions/Client'
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /products/list:
+    get:
+      summary: Список товаров компании
+      description: |
+        Список товаров компании, находящихся в определенной группе.
+      tags:
+        - Products
+      parameters:
+        - name: limit
+          in: query
+          description: Ограничение количества товаров в ответе.
+          type: integer
+        - name: last_id
+          in: query
+          description: Ограничить выборку товаров с идентификаторами не выше указанного.
+          type: integer
+        - name: group_id
+          in: query
+          description: Идентификатор группы. По-умолчанию - идентификатор корневой группы компании.
+          type: integer
+      responses:
+        '200':
+          description: Список товаров
+          schema:
+            type: object
+            properties:
+              group_id:
+                type: integer
+                description: Идентификатор отображенной группы.
+              products:
+                type: array
+                items:
+                  $ref: '#/definitions/Product'
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /products/{id}:
+    get:
+      summary: Информация о товаре
+      description: |
+        Информация о товаре с указанным идентификатором.
+      tags:
+        - Products
+      parameters:
+        - name: id
+          in: path
+          description: Уникальный идентификатор товара.
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: Информация о товаре
+          schema:
+            properties:
+              product:
+                $ref: '#/definitions/Product'
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /products/by_external_id/{id}:
+    get:
+      summary: Информация о товаре
+      description: |
+        Информация о товаре с указанным идентификатором в вашей системе учёта (external_id). Рекомендуем использовать URL-encoding при указании идентификатора. 
+      parameters:
+        - name: id
+          in: path
+          description: Уникальный идентификатор товара в вашей системе учёта (external_id).
+          required: true
+          type: string
+      tags:
+        - Products
+      responses:
+        '200':
+          description: Информация о товаре
+          schema:
+            type: object
+            properties:
+              product:
+                $ref: '#/definitions/Product'
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /products/edit:
+    post:
+      summary: Редактирование товаров.
+      description: |
+        Редактирование списка товаров.
+      parameters:
+        - name: body
+          in: body
+          description: Параметры запроса.
+          required: true
+          schema:
+            $ref: '#/definitions/ProductEdit'
+      tags:
+        - Products
+      responses:
+        '200':
+          description: Список идентификаторов обработанных сообщений и ошибок.
+          schema:
+            type: object
+            properties:
+              processed_ids:
+                type: array
+                items:
+                  type: integer
+                  format: int64
+              errors:
+                type: object
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ProductEditError'
+  /products/edit_by_external_id:
+    post:
+      summary: Редактирование товаров (по внешнему идентификатору).
+      description: |
+        Редактирование списка товаров (по внешнему идентификатору).
+      parameters:
+        - name: body
+          in: body
+          description: Параметры запроса.
+          required: true
+          schema:
+            $ref: '#/definitions/ProductEditByExternalId'
+      tags:
+        - Products
+      responses:
+        '200':
+          description: Список идентификаторов обработанных сообщений и ошибок.
+          schema:
+            type: object
+            properties:
+              processed_ids:
+                type: array
+                items:
+                  type: integer
+                  format: int64
+              errors:
+                type: object
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ProductEditError'
+  /products/import_url:
+    post:
+      summary: Импорт товаров
+      description: Импорт товаров с помощью ссылки на xls,csv,xlsx,xml,cml файл.
+      parameters:
+        - name: body
+          in: body
+          description: Параметры запроса.
+          required: true
+          schema:
+            $ref: '#/definitions/ImportProductURL'
+      tags:
+        - Products
+      responses:
+        '200':
+          description: Идентификатор процесса, позволяющий увидеть состояние импорта на разных этапах
+          schema:
+            type: object
+            properties:
+              id:
+                type: string
+              status:
+                description: Статус импорта на этапе валидации входных параметров
+                type: string
+                enum:
+                  - success
+                  - error
+        default:
+          description: Validation error
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+              message:
+                type: string
+  /products/import_file:
+    post:
+      summary: Импорт товаров
+      description: Импорт товаров с помощью xls,csv,xlsx,xml,cml файла.
       consumes:
-      - "application/json"
-      produces:
-      - "application/json"
-      - "application/xml"
+        - ''
       parameters:
-      - in: "body"
-        name: "body"
-        description: "order placed for purchasing the pet"
-        required: true
-        schema:
-          $ref: "#/definitions/Order"
-      responses:
-        200:
-          description: "successful operation"
+        - name: body
+          in: body
+          description: Параметры запроса.
+          required: true
           schema:
-            $ref: "#/definitions/Order"
-        400:
-          description: "Invalid Order"
-  /store/order/{orderId}:
-    get:
+            $ref: '#/definitions/ImportProductWithFile'
       tags:
-      - "store"
-      summary: "Find purchase order by ID"
-      description: "For valid response try integer IDs with value >= 1 and <= 10.\
-        \ Other values will generated exceptions"
-      operationId: "getOrderById"
-      produces:
-      - "application/json"
-      - "application/xml"
-      parameters:
-      - name: "orderId"
-        in: "path"
-        description: "ID of pet that needs to be fetched"
-        required: true
-        type: "integer"
-        maximum: 10
-        minimum: 1
-        format: "int64"
+        - Products
       responses:
-        200:
-          description: "successful operation"
+        '200':
+          description: Идентификатор процесса, позволяющий увидеть состояние импорта на разных этапах
           schema:
-            $ref: "#/definitions/Order"
-        400:
-          description: "Invalid ID supplied"
-        404:
-          description: "Order not found"
-    delete:
-      tags:
-      - "store"
-      summary: "Delete purchase order by ID"
-      description: "For valid response try integer IDs with positive integer value.\
-        \ Negative or non-integer values will generate API errors"
-      operationId: "deleteOrder"
-      produces:
-      - "application/json"
-      - "application/xml"
-      parameters:
-      - name: "orderId"
-        in: "path"
-        description: "ID of the order that needs to be deleted"
-        required: true
-        type: "integer"
-        minimum: 1
-        format: "int64"
-      responses:
-        400:
-          description: "Invalid ID supplied"
-        404:
-          description: "Order not found"
-  /store/inventory:
+            type: object
+            properties:
+              id:
+                type: string
+              status:
+                description: Статус импорта на этапе валидации входных параметров
+                type: string
+                enum:
+                  - success
+                  - error
+        default:
+          description: Validation error
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+              message:
+                type: string
+  /products/import/status/{id}:
     get:
+      summary: Статус импорта
+      description: Проверка состояния импорта товаров.
+      parameters:
+        - name: id
+          in: path
+          description: ID процесса импорта.
+          required: true
+          type: integer
+          format: int64
       tags:
-      - "store"
-      summary: "Returns pet inventories by status"
-      description: "Returns a map of status codes to quantities"
-      operationId: "getInventory"
-      produces:
-      - "application/json"
+        - Products
+      responses:
+        '200':
+          description: Информация о состоянии импорта
+          schema:
+            $ref: '#/definitions/ImportProductStatus'
+        default:
+          description: Validation error
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+              message:
+                type: string
+  /groups/list:
+    get:
+      summary: Список груп компании
+      description: |
+        Список груп компании.
+      parameters:
+        - name: limit
+          in: query
+          description: Ограничение количества груп в ответе.
+          required: false
+          type: integer
+          format: int64
+        - name: last_id
+          in: query
+          description: Ограничить выборку груп с идентификаторами не выше указанного.
+          required: false
+          type: integer
+          format: int64
+      tags:
+        - Groups
+      responses:
+        '200':
+          description: Список груп
+          schema:
+            type: object
+            properties:
+              groups:
+                type: array
+                items:
+                  $ref: '#/definitions/Group'
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /payment_options/list:
+    get:
+      summary: Список способов оплаты компании.
+      description: |
+        Список способов оплаты компании.
       parameters: []
+      tags:
+        - PaymentOption
       responses:
-        200:
-          description: "successful operation"
+        '200':
+          description: Список способов оплаты
           schema:
-            type: "object"
-            additionalProperties:
-              type: "integer"
-              format: "int32"
-      security:
-      - api_key: []
-  /user/createWithArray:
-    post:
-      tags:
-      - "user"
-      summary: "Creates list of users with given input array"
-      description: ""
-      operationId: "createUsersWithArrayInput"
-      consumes:
-      - "application/json"
-      produces:
-      - "application/json"
-      - "application/xml"
-      parameters:
-      - in: "body"
-        name: "body"
-        description: "List of user object"
-        required: true
-        schema:
-          type: "array"
-          items:
-            $ref: "#/definitions/User"
-      responses:
+            type: object
+            properties:
+              payment_options:
+                type: array
+                items:
+                  $ref: '#/definitions/PaymentOption'
         default:
-          description: "successful operation"
-  /user/createWithList:
-    post:
-      tags:
-      - "user"
-      summary: "Creates list of users with given input array"
-      description: ""
-      operationId: "createUsersWithListInput"
-      consumes:
-      - "application/json"
-      produces:
-      - "application/json"
-      - "application/xml"
-      parameters:
-      - in: "body"
-        name: "body"
-        description: "List of user object"
-        required: true
-        schema:
-          type: "array"
-          items:
-            $ref: "#/definitions/User"
-      responses:
-        default:
-          description: "successful operation"
-  /user/{username}:
-    get:
-      tags:
-      - "user"
-      summary: "Get user by user name"
-      description: ""
-      operationId: "getUserByName"
-      produces:
-      - "application/json"
-      - "application/xml"
-      parameters:
-      - name: "username"
-        in: "path"
-        description: "The name that needs to be fetched. Use user1 for testing. "
-        required: true
-        type: "string"
-      responses:
-        200:
-          description: "successful operation"
+          description: unexpected error
           schema:
-            $ref: "#/definitions/User"
-        400:
-          description: "Invalid username supplied"
-        404:
-          description: "User not found"
-    put:
-      tags:
-      - "user"
-      summary: "Updated user"
-      description: "This can only be done by the logged in user."
-      operationId: "updateUser"
-      consumes:
-      - "application/json"
-      produces:
-      - "application/json"
-      - "application/xml"
-      parameters:
-      - name: "username"
-        in: "path"
-        description: "name that need to be updated"
-        required: true
-        type: "string"
-      - in: "body"
-        name: "body"
-        description: "Updated user object"
-        required: true
-        schema:
-          $ref: "#/definitions/User"
-      responses:
-        400:
-          description: "Invalid user supplied"
-        404:
-          description: "User not found"
-    delete:
-      tags:
-      - "user"
-      summary: "Delete user"
-      description: "This can only be done by the logged in user."
-      operationId: "deleteUser"
-      produces:
-      - "application/json"
-      - "application/xml"
-      parameters:
-      - name: "username"
-        in: "path"
-        description: "The name that needs to be deleted"
-        required: true
-        type: "string"
-      responses:
-        400:
-          description: "Invalid username supplied"
-        404:
-          description: "User not found"
-  /user/login:
-    get:
-      tags:
-      - "user"
-      summary: "Logs user into the system"
-      description: ""
-      operationId: "loginUser"
-      produces:
-      - "application/json"
-      - "application/xml"
-      parameters:
-      - name: "username"
-        in: "query"
-        description: "The user name for login"
-        required: true
-        type: "string"
-      - name: "password"
-        in: "query"
-        description: "The password for login in clear text"
-        required: true
-        type: "string"
-      responses:
-        200:
-          description: "successful operation"
-          headers:
-            X-Expires-After:
-              type: "string"
-              format: "date-time"
-              description: "date in UTC when token expires"
-            X-Rate-Limit:
-              type: "integer"
-              format: "int32"
-              description: "calls per hour allowed by the user"
-          schema:
-            type: "string"
-        400:
-          description: "Invalid username/password supplied"
-  /user/logout:
-    get:
-      tags:
-      - "user"
-      summary: "Logs out current logged in user session"
-      description: ""
-      operationId: "logoutUser"
-      produces:
-      - "application/json"
-      - "application/xml"
-      parameters: []
-      responses:
-        default:
-          description: "successful operation"
-  /user:
+            $ref: '#/definitions/Error'
+  /delivery/save_declaration_id:
     post:
-      tags:
-      - "user"
-      summary: "Create user"
-      description: "This can only be done by the logged in user."
-      operationId: "createUser"
-      consumes:
-      - "application/json"
-      produces:
-      - "application/json"
-      - "application/xml"
+      summary: Сохранение номера декларации
+      description: Сохранение номера декларации сгенерированного не через кабинет prom.ua
       parameters:
-      - in: "body"
-        name: "body"
-        description: "Created user object"
-        required: true
-        schema:
-          $ref: "#/definitions/User"
+        - name: body
+          in: body
+          description: Параметры запроса.
+          required: true
+          schema:
+            $ref: '#/definitions/DeliverySaveCreatedDeclarationIdParameters'
+      tags:
+        - Delivery
       responses:
+        '200':
+          description: Результат успешного сохранения номера декларации
+          schema:
+            type: object
+            properties:
+              status:
+                description: Статус сохранения номера декларации
+                type: string
+                enum:
+                  - success
+                example: success
         default:
-          description: "successful operation"
-securityDefinitions:
-  api_key:
-    type: "apiKey"
-    name: "api_key"
-    in: "header"
-  petstore_auth:
-    type: "oauth2"
-    authorizationUrl: "https://petstore.swagger.io/oauth/authorize"
-    flow: "implicit"
-    scopes:
-      read:pets: "read your pets"
-      write:pets: "modify pets in your account"
+          description: Результат неуспешного сохранения номера декларации
+          schema:
+            type: object
+            properties:
+              status:
+                description: Статус сохранения номера декларации
+                type: string
+                enum:
+                  - error
+                example: error
+              message:
+                description: Текст ошибки сохранения номера декларации
+                type: string
+                example: Ошибка валидации
+              errors:
+                description: Ошибки валидации. errors есть в ответе при ошибках валидации
+                type: object
+                example:
+                  declaration_id: Номер декларации должен состоять из цифр
 definitions:
-  ApiResponse:
-    type: "object"
-    properties:
-      code:
-        type: "integer"
-        format: "int32"
-      type:
-        type: "string"
-      message:
-        type: "string"
-  Category:
-    type: "object"
-    properties:
-      id:
-        type: "integer"
-        format: "int64"
-      name:
-        type: "string"
-    xml:
-      name: "Category"
-  Pet:
-    type: "object"
-    required:
-    - "name"
-    - "photoUrls"
-    properties:
-      id:
-        type: "integer"
-        format: "int64"
-      category:
-        $ref: "#/definitions/Category"
-      name:
-        type: "string"
-        example: "doggie"
-      photoUrls:
-        type: "array"
-        xml:
-          wrapped: true
-        items:
-          type: "string"
-          xml:
-            name: "photoUrl"
-      tags:
-        type: "array"
-        xml:
-          wrapped: true
-        items:
-          xml:
-            name: "tag"
-          $ref: "#/definitions/Tag"
-      status:
-        type: "string"
-        description: "pet status in the store"
-        enum:
-        - "available"
-        - "pending"
-        - "sold"
-    xml:
-      name: "Pet"
-  Tag:
-    type: "object"
-    properties:
-      id:
-        type: "integer"
-        format: "int64"
-      name:
-        type: "string"
-    xml:
-      name: "Tag"
   Order:
-    type: "object"
     properties:
       id:
-        type: "integer"
-        format: "int64"
-      petId:
-        type: "integer"
-        format: "int64"
-      quantity:
-        type: "integer"
-        format: "int32"
-      shipDate:
-        type: "string"
-        format: "date-time"
-      status:
-        type: "string"
-        description: "Order Status"
-        enum:
-        - "placed"
-        - "approved"
-        - "delivered"
-      complete:
-        type: "boolean"
-    xml:
-      name: "Order"
-  User:
-    type: "object"
-    properties:
-      id:
-        type: "integer"
-        format: "int64"
-      username:
-        type: "string"
-      firstName:
-        type: "string"
-      lastName:
-        type: "string"
-      email:
-        type: "string"
-      password:
-        type: "string"
+        type: integer
+        description: Уникальный идентификатор заказа.
+      date_created:
+        type: string
+        description: Дата создания заказа в формате ISO-8601. Пример - "2015-04-28T12:50:34.588791+00:00"
+      client_first_name:
+        type: string
+        description: Имя клиента.
+      client_second_name:
+        type: string
+        description: Отчество клиента
+      client_last_name:
+        type: string
+        description: Фамилия клиента.
+      client_id:
+        type: integer
+        description: Уникальный идентификатор клиента
+        example: 12345
+      client_notes:
+        type: string
+        description: Добавленный пользователем комментарий.
+      products:
+        type: array
+        items:
+          type: object
+          properties:
+            id:
+              type: integer
+              description: Уникальный идентификатор товара.
+            external_id:
+              type: string
+              description: Уникальный идентификатор (внешней системы) товара.
+            image:
+              type: string
+              description: Ссылка на изображение.
+            quantity:
+              type: number
+              format: float
+              description: Количество единиц товара в заказе.
+            price:
+              type: string
+              description: Цена товара за единицу.
+            url:
+              type: string
+              description: Ссылка на товар на сайте компании.
+            name:
+              type: string
+              description: Название товара.
+            total_price:
+              type: string
+              description: Сумма заказа.
+            measure_unit:
+              type: string
+              description: Единица измерения.
+            sku:
+              type: string
+              description: Код (артикул) товара.
       phone:
-        type: "string"
-      userStatus:
-        type: "integer"
-        format: "int32"
-        description: "User Status"
-    xml:
-      name: "User"
-externalDocs:
-  description: "Find out more about Swagger"
-  url: "http://swagger.io"
+        type: string
+        description: Телефон клиента.
+      email:
+        type: string
+        description: Email клиента.
+      price:
+        type: string
+        description: Сумма заказа.
+      delivery_option:
+        type: object
+        properties:
+          id:
+            type: integer
+            description: Уникальный идентификатор способа доставки.
+          name:
+            type: string
+            description: Название способа доставки.
+      delivery_provider_data:
+        type: object
+        description: Данные провайдера доставки, связанные с заказом. Если в заказе выбран способ доставки, который не входит в список поддерживаемых (см. поле 'provider' ниже), обьект будет null
+        properties:
+          provider:
+            type: string
+            enum:
+              - nova_poshta
+              - justin
+              - delivery_auto
+              - ukrposhta
+            description: Идентификатор провайдера доставки.
+          type:
+            type: string
+            enum:
+              - W2W
+              - W2D
+              - D2W
+              - D2D
+            description: Идентификатор типа доставки, где буква W - отделение, D - курьер. Соответственно, W2D - отправка с отделения, получение курьером.
+          sender_warehouse_id:
+            type: string
+            description: Идентификатор отделения отправки в системе провайдера доставки (У Укрпочты - индекс отделения). null если отправка не с отделения.
+          recipient_warehouse_id:
+            type: string
+            description: Идентификатор отделения получения в системе провайдера доставки (У Укрпочты - индекс отделения). null если доставка не в отделение.
+          declaration_number:
+            type: string
+            description: Номер накладной в системе провайдера доставки
+      delivery_address:
+        type: string
+        description: Адрес доставки.
+      payment_option:
+        type: object
+        properties:
+          id:
+            type: integer
+            description: Уникальный идентификатор способа оплаты.
+          name:
+            type: string
+            description: Название способа оплаты.
+      payment_data:
+        type: object
+        properties:
+          type:
+            type: string
+            description: Способ оплаты
+            enum:
+              - evopay
+          status:
+            type: string
+            description: |-
+              Статус оплаты: 
+              * `paid` - оплачено покупателем
+              * `unpaid` - не оплачено
+              * `refunded` - выполнен возврат покупателю
+              * `paid_out` - выплачено продавцу
+            enum:
+              - paid
+              - unpaid
+              - refunded
+              - paid_out
+          status_modified:
+            type: string
+            description: Дата последнего изменения статуса оплаты, в формате ISO-8601. Пример - "2015-04-28T12:50:34.588791+00:00"
+      status:
+        type: string
+        description: Статус заказа.
+        enum:
+          - pending
+          - received
+          - delivered
+          - canceled
+          - draft
+          - paid
+      source:
+        type: string
+        description: Источник заказа
+        enum:
+          - portal
+          - company_site
+          - company_cabinet
+          - mobile_app
+          - bigl
+  Message:
+    properties:
+      id:
+        type: integer
+        description: Уникальный идентификатор сообщения.
+      date_created:
+        type: string
+        description: Дата создания сообщения в формате ISO-8601. Пример - "2015-04-28T12:50:34.588791+00:00"
+      client_full_name:
+        type: string
+        description: ФИО клиента.
+      phone:
+        type: string
+        description: Телефон клиента.
+      message:
+        type: string
+        description: Текст сообщения.
+      subject:
+        type: string
+        description: Тема сообщения.
+      status:
+        type: string
+        description: Статус сообщения.
+        enum:
+          - unread
+          - read
+          - deleted
+      product_id:
+        type: integer
+        description: Уникальный идентификатор товара.
+  Client:
+    properties:
+      id:
+        type: integer
+        description: Уникальный идентификатор клиента.
+      client_full_name:
+        type: string
+        description: ФИО клиента.
+      phones:
+        description: Список телефонов клиента.
+        type: array
+        items:
+          type: string
+      emails:
+        description: Список email-ов клиента.
+        type: array
+        items:
+          type: string
+      comment:
+        type: string
+        description: Примечание о клиенте.
+      skype:
+        type: string
+        description: Skype клиента.
+      orders_count:
+        type: integer
+      total_payout:
+        type: string
+        description: Сумма всех заказов клиента.
+  Product:
+    type: object
+    properties:
+      id:
+        type: integer
+        format: int64
+        description: Уникальный идентификатор товара.
+        example: 660913934
+      external_id:
+        type: string
+        description: Уникальный идентификатор (внешней системы) товара.
+        example: null
+      name:
+        type: string
+        description: Название товара.
+        example: Вечернее платье
+      sku:
+        type: string
+        description: Артикул товара.
+        example: AA7775
+      keywords:
+        type: string
+        description: Ключевые слова товара.
+        example: Платье, коктейльное платье
+      description:
+        description: Описание товара.
+        type: string
+        example: Коктейльное платье или платье-коктейль — укороченное женское платье для торжественных случаев без воротника и рукавов.
+      selling_type:
+        description: Тип товара.
+        type: string
+        enum:
+          - retail
+          - wholesale
+          - universal
+          - service
+        example: universal
+      presence:
+        type: string
+        description: Наличие товара.
+        enum:
+          - available
+          - not_available
+          - order
+          - service
+          - waiting
+        example: available
+      presence_sure:
+        type: boolean
+        enum:
+          - false
+          - true
+        description: Статус «Гарантия наличия».
+      price:
+        type: number
+        format: float
+        description: Цена товара.
+        example: 150
+      minimum_order_quantity:
+        type: number
+        format: float
+        description: Минимальное количество товаров в заказе.
+        example: null
+      discount:
+        description: Скидка
+        type: object
+        properties:
+          value:
+            type: number
+            description: Установленное значение скидки
+            example: 15
+          type:
+            type: string
+            description: Тип скидки (абсолютное значение/процент)
+            enum:
+              - amount
+              - percent
+            example: percent
+          date_start:
+            type: string
+            description: Дата начала периода скидок
+            example: 22.03.2018
+          date_end:
+            type: string
+            description: Дата окончания периода скидок
+            example: 22.04.2018
+      currency:
+        type: string
+        description: Валюта товара.
+        example: USD
+      group:
+        type: object
+        properties:
+          id:
+            type: integer
+            description: Идентификатор товарной группы.
+            example: 2366571
+          name:
+            type: string
+            description: Название товарной группы.
+            example: Корневая группа
+      category:
+        type: object
+        properties:
+          id:
+            type: integer
+            description: идентификатор категории
+            example: 35402
+          caption:
+            type: string
+            description: название категории
+            example: платья женские
+      prices:
+        description: Сетка оптовых цен.
+        type: array
+        items:
+          type: object
+          properties:
+            price:
+              type: number
+              format: float
+              description: Цена за товар при покупке свыше указанного количества.
+              example: 100.75
+            minimum_order_quantity:
+              type: number
+              format: float
+              description: Минимальное количество единиц товара для указанной цены.
+              example: 10
+      main_image:
+        type: string
+        description: Ссылка на главное изображение товара.
+        example: https://my.example.com/media/images/1075345153_w200_h200_dress.jpg
+      images:
+        type: array
+        description: Дополнительные изображения товара.
+        items:
+          type: object
+          properties:
+            url:
+              type: string
+              example: https://my.example.com/media/images/1075345152_w200_h200_dress_front.png
+            thumbnail_url:
+              type: string
+              example: https://my.example.com/media/images/1075345152_w100_h100_dress_front.png
+            id:
+              type: integer
+              example: 1075345152
+      status:
+        type: string
+        description: Статус товара.
+        enum:
+          - on_display
+          - draft
+          - deleted
+          - not_on_display
+          - editing_required
+          - approval_pending
+          - deleted_by_moderator
+        example: on_display
+  Group:
+    properties:
+      id:
+        type: integer
+        description: Уникальный идентификатор группы.
+      name:
+        type: string
+        description: Название группы.
+      description:
+        type: string
+        description: Описание группы.
+      image:
+        type: string
+        description: Ссылка на изображение группы.
+      parent_group_id:
+        type: integer
+        description: Идентификатор родительской группы.
+  PaymentOption:
+    properties:
+      id:
+        type: integer
+        description: Уникальный идентификатор способа оплаты.
+      name:
+        type: string
+        description: Название способа оплаты.
+      description:
+        type: string
+        description: Описание способа оплаты.
+  ProductEdit:
+    type: array
+    items:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          description: Уникальный идентификатор товара.
+          type: integer
+          format: int64
+        presence:
+          description: Наличие товара.
+          type: string
+          enum:
+            - available
+            - not_available
+            - order
+            - waiting
+        presence_sure:
+          description: Статус «Гарантия наличия».
+          type: boolean
+        price:
+          description: Цена товара.
+          type: number
+          format: float
+          minimum: 0.00001
+        status:
+          description: Статус сообщения.
+          type: string
+          enum:
+            - on_display
+            - draft
+            - deleted
+            - not_on_display
+        prices:
+          description: Сетка оптовых цен.
+          type: array
+          items:
+            type: object
+            properties:
+              price:
+                type: number
+                format: float
+              minimum_order_quantity:
+                type: number
+                format: float
+        discount:
+          description: Скидка
+          type: object
+          properties:
+            value:
+              type: number
+              description: Установленное значение скидки
+            type:
+              type: string
+              description: Тип скидки (абсолютное значение/процент)
+              enum:
+                - amount
+                - percent
+            date_start:
+              type: string
+              description: Дата начала периода скидок ДД.ММ.ГГГГ
+            date_end:
+              type: string
+              description: Дата окончания периода скидок ДД.ММ.ГГГГ
+        name:
+          description: Название товара.
+          type: string
+          maxLength: 150
+        keywords:
+          description: Строка ключевых слов (разделитель запятая пробел ', ').
+          type: string
+          maxLength: 1024
+        description:
+          description: Описание товара (может содержать html теги).
+          type: string
+          maxLength: 50000
+  ProductEditByExternalId:
+    type: array
+    items:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          description: Уникальный идентификатор товара в вашей системе учёта товаров (external_id).
+          type: string
+        presence:
+          description: Наличие товара.
+          type: string
+          enum:
+            - available
+            - not_available
+            - order
+            - waiting
+        presence_sure:
+          description: Статус «Гарантия наличия».
+          type: boolean
+        price:
+          description: Цена товара.
+          type: number
+          format: float
+          minimum: 0.00001
+        status:
+          description: Статус сообщения.
+          type: string
+          enum:
+            - on_display
+            - draft
+            - deleted
+            - not_on_display
+        prices:
+          description: Сетка оптовых цен.
+          type: array
+          items:
+            type: object
+            properties:
+              price:
+                type: number
+                format: float
+              minimum_order_quantity:
+                type: number
+                format: float
+        discount:
+          description: Скидка
+          type: object
+          properties:
+            value:
+              type: number
+              description: Установленное значение скидки
+            type:
+              type: string
+              description: Тип скидки (абсолютное значение/процент)
+              enum:
+                - amount
+                - percent
+            date_start:
+              type: string
+              description: Дата начала периода скидок в формате ДД.ММ.ГГГГ
+            date_end:
+              type: string
+              description: Дата окончания периода скидок ДД.ММ.ГГГГ
+        name:
+          description: Название товара.
+          type: string
+          maxLength: 150
+        keywords:
+          description: Строка ключевых слов (разделитель запятая пробел ', ').
+          type: string
+          maxLength: 1024
+        description:
+          description: Описание товара (может содержать html теги).
+          type: string
+          maxLength: 50000
+        quantity_in_stock:
+          description: Остаток продукта на складе (Отключен для разновидностей, которые наследуют наличие)
+          type: integer
+          format: int64
+  MessageReply:
+    properties:
+      id:
+        description: Идентификатор сообщения.
+        type: integer
+        format: int64
+      message:
+        description: Текст сообщения. Ограничение - 1000 символов.
+        type: string
+  SetMessageStatus:
+    properties:
+      status:
+        description: Статус сообщения.
+        type: string
+        enum:
+          - unread
+          - read
+          - deleted
+      ids:
+        description: Список уникальных идентификаторов.
+        type: array
+        items:
+          type: integer
+          format: int64
+  SetOrderStatus:
+    properties:
+      status:
+        description: Статус заказа.
+        type: string
+        enum:
+          - pending
+          - received
+          - delivered
+          - canceled
+          - draft
+          - paid
+      ids:
+        description: Список уникальных идентификаторов.
+        type: array
+        items:
+          type: integer
+          format: int64
+      cancellation_reason:
+        description: Причина отмены заказа (Только для статуса "canceled").
+        type: string
+        enum:
+          - not_available
+          - price_changed
+          - buyers_request
+          - not_enough_fields
+          - duplicate
+          - invalid_phone_number
+          - less_than_minimal_price
+          - another
+      cancellation_text:
+        description: Сообщение для причины отмены заказа (Только для статуса "canceled"). Обязательно в случае, если "cancellation_reason" имеет значение "price_changed", "not_enough_fields" или "another"
+        type: string
+  PaymentRefund:
+    properties:
+      ids:
+        description: Список уникальных идентификаторов.
+        type: array
+        items:
+          type: integer
+          format: int64
+  ImportProductURL:
+    required:
+      - url
+    properties:
+      url:
+        description: Ссылка на xls,csv,xlsx,xml,cml документ
+        type: string
+        maxLength: 1024
+      force_update:
+        description: Обновить принудительно
+        type: boolean
+      only_available:
+        description: Импорт только товаров в статусах «В наличии» и «Под заказ».
+        type: boolean
+        default: false
+      mark_missing_product_as:
+        description: Помечать отсутствующие продукты следующим статусом
+        type: string
+        enum:
+          - none
+          - not_available
+          - not_on_display
+          - deleted
+        default: none
+      updated_fields:
+        type: array
+        items:
+          description: Список полей, которые необходимо обновить
+          type: string
+          enum:
+            - name
+            - sku
+            - price
+            - images_urls
+            - presence
+            - quantity_in_stock
+            - description
+            - group
+            - keywords
+            - attributes
+            - discount
+            - labels
+            - gtin
+            - mpn
+          default:
+            - price
+            - presence
+  ImportProductWithFile:
+    properties:
+      file:
+        description: xls,csv,xlsx,xml,cml документ
+        type: string
+        format: binary
+      data:
+        description: Настройки для импорта (JSON формат).
+        type: object
+        properties:
+          force_update:
+            description: Обновить принудительно
+            type: boolean
+            default: false
+          only_available:
+            description: Импорт только товаров в статусах «В наличии» и «Под заказ».
+            type: boolean
+            default: false
+          mark_missing_product_as:
+            description: Помечать отсутствующие продукты следующим статусом
+            type: string
+            enum:
+              - none
+              - not_available
+              - not_on_display
+              - deleted
+            default: none
+          updated_fields:
+            type: array
+            items:
+              description: Список полей, которые необходимо обновить
+              type: string
+              enum:
+                - name
+                - sku
+                - price
+                - images_urls
+                - presence
+                - quantity_in_stock
+                - description
+                - group
+                - keywords
+                - attributes
+                - discount
+                - labels
+                - gtin
+                - mpn
+              default:
+                - price
+                - presence
+  DeliverySaveCreatedDeclarationIdParameters:
+    properties:
+      order_id:
+        description: Номер заказа
+        type: integer
+        format: int64
+        example: 103920887
+      declaration_id:
+        description: Номер декларации провайдера доставки
+        type: string
+        example: '20450268096789'
+      delivery_type:
+        description: Тип доставки
+        type: string
+        enum:
+          - nova_poshta
+        example: nova_poshta
+  ImportProductStatus:
+    properties:
+      status:
+        description: Статус импорта
+        type: string
+        enum:
+          - SUCCESS
+          - PARTIAL
+          - FATAL
+      not_changed:
+        description: Количество позиций, оставшихся без изменения
+        type: integer
+      updated:
+        description: Количество обновленных позиций
+        type: integer
+      not_in_fle:
+        description: Количество позиций, которых нет в файле импорта
+        type: integer
+      imported:
+        description: Количество импортрованных позиций
+        type: integer
+      created:
+        description: Количество созданных позиций
+        type: integer
+      actualized:
+        description: Количество актуализированных позиций
+        type: integer
+      created_active:
+        description: Создано активных позиций
+        type: integer
+      created_hidden:
+        description: Создано скрытых позиций
+        type: integer
+      total:
+        description: Всего загружено позиций
+        type: integer
+      with_errors_count:
+        description: Всего позиций с ошибками
+        type: integer
+      errors:
+        description: Список ошибок
+        type: array
+        items:
+          type: object
+          properties:
+            download:
+              description: Ошибки на этапе загрузки файла
+              type: object
+            store_file:
+              description: Ошибки на этапе сохранения файла
+              type: object
+            validation:
+              description: Ошибки на этапе валидации позиций файла
+              type: object
+            import:
+              description: Ошибки на этапе импорта позиций
+              type: object
+            download_images:
+              description: Ошибки на этапе загрузки изображений
+              type: object
+  Error:
+    properties:
+      error:
+        description: Ошибка при выполнении запроса.
+        type: string
+  ProductEditError:
+    properties:
+      errors:
+        description: Ошибки с указанием id товара, для которого не удалось выполнить запрос.
+        type: object
+      processed_ids:
+        type: array
+        items:
+          type: integer
+          format: int64

@@ -7,14 +7,7 @@ info:
     \ filters."
   version: "1.0.5"
   title: "Swagger Petstore"
-  termsOfService: "http://swagger.io/terms/"
-  contact:
-    email: "apiteam@swagger.io"
-  license:
-    name: "Apache 2.0"
-    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
-host: "petstore.swagger.io"
-basePath: "/v2"
+host: "my.prom.ua/api/v1"
 tags:
 - name: "pet"
   description: "Everything about your Pets"

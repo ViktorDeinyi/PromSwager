@@ -1,12 +1,12 @@
 ---
 swagger: "2.0"
 info:
-  description: "It is britney B**ch.  You can find out more about\
+  description: "Our prom.ua api.  You can find out more about\
     \ Swagger at [http://swagger.io](http://swagger.io) or on [irc.freenode.net, #swagger](http://swagger.io/irc/).\
     \  For this sample, you can use the api key `special-key` to test the authorization\
     \ filters."
   version: "1.0.5"
-  title: "Swagger Petstore"
+  title: "It is britney B**ch"
 host: "my.prom.ua/api/v1"
 tags:
 - name: "pet"

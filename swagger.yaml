@@ -1,14 +1,19 @@
 swagger: '2.0'
 info:
-  description: Этоткоструктон сознан для тестирования APi в разделе личного кабинета продавца на ресурсе [Prom.ua](https://prom.ua) Публичное API позволяет компаниям, зарегистрированным на портале получать удаленный доступ к управлению данными в Кабинете компании через свой собственный программный интерфейс.
-  version: 1.0.0
-  title: It's Britney b**ch
+  description: | 
+   This is our group KH-067-QA-02 demo project for testing API [prom.ua](https://rabota.ua).
+   
+   For this demo project you can use the api key `bearer-token` to test the API.
+  version: 1.1.0
+  title: Prom.ua Web OpenAPI
 schemes:
   - https
 host: my.prom.ua/api/v1
 tags:
+  - name: Notifications
+    description: (operations with notifications)
   - name: Orders
-    description: (операции с заказами)
+    description: (order operations)
   - name: Products
     description: (операции с продуктами)
   - name: Clients
@@ -21,37 +26,67 @@ tags:
     description: (операции со способами оплат)
   - name: Delivery
     description: (операции со способами доставок)
+  - name: GroupTranslation
+    description: GroupTranslation
 paths:
+  /notifications/get_by_type:
+    post:
+      summary: get notificationsby type
+      description: |
+        Receive the list of Company's notifications by type.
+      parameters:
+        - name: body
+          in: body
+          description: Request parameters.
+          schema:
+            $ref: '#/definitions/Notifications'
+      tags:
+        - Notifications
+      responses:
+        '200':
+          description: The list of notificationIds got by type.
+          schema:
+            type: object
+            properties:
+              processed_ids:
+                type: array
+                items:
+                  type: integer
+                  format: int64
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/Error'
   /orders/list:
     get:
-      summary: Список заказов компании
+      summary: List of the orders
       description: |
-        Список заказов компании с подробной информацией о клиенте, адресе и способе доставки.
+        A list of company orders with detailed information about the client, address and delivery method, added products and status.
       parameters:
         - name: status
           in: query
-          description: Статус заказа.
+          description: Order status.
           required: false
           type: string
         - name: date_from
           in: query
-          description: Запрос заказов, созданных после указанной даты. Пример - "2015-04-28T12:50:34".
+          description: Query for orders created after the specified date. Example - "2015-04-28T12:50:34".
           required: false
           type: string
         - name: date_to
           in: query
-          description: Запрос заказов, созданных до указанной даты. Пример - "2015-04-28T12:50:34".
+          description: Query for orders created before the specified date. Example - "2015-04-28T12:50:34".
           required: false
           type: string
         - name: limit
           in: query
-          description: Ограничение количества заказов в ответе.
+          description: Limiting quantity of orders in the response.
           required: false
           type: integer
           format: int64
         - name: last_id
           in: query
-          description: Ограничить выборку заказами с идентификаторами не выше указанного.
+          description: Limit the selection of orders with IDs no higher than the set ones.
           required: false
           type: integer
           format: int64
@@ -59,7 +94,7 @@ paths:
         - Orders
       responses:
         '200':
-          description: Список заказов
+          description: List of the orders
           schema:
             type: object
             properties:
@@ -73,13 +108,13 @@ paths:
             $ref: '#/definitions/Error'
   /orders/{id}:
     get:
-      summary: Информация о заказе
+      summary: Information about order
       description: |
-        Информация о заказе с указанным идентификатором.
+        Information about the order with the specified ID.
       parameters:
         - name: id
           in: path
-          description: Уникальный идентификатор заказа.
+          description: The unique identifier for the order.
           required: true
           type: integer
           format: int64
@@ -87,7 +122,7 @@ paths:
         - Orders
       responses:
         '200':
-          description: Информация о заказе
+          description: Information about order
           schema:
             type: object
             properties:
@@ -99,20 +134,20 @@ paths:
             $ref: '#/definitions/Error'
   /orders/set_status:
     post:
-      summary: Смена статуса заказа (-ов).
+      summary: Change of official order(s).
       description: |
-        Изменение статуса заказов по списку уникальных идентификаторов.
+        Changing the status of orders according to the list of unique identifiers.
       parameters:
         - name: body
           in: body
-          description: Параметры запроса.
+          description: Request parameters.
           schema:
             $ref: '#/definitions/SetOrderStatus'
       tags:
         - Orders
       responses:
         '200':
-          description: Список идентификаторов обработанных заказов.
+          description: List of IDs of processed orders.
           schema:
             type: object
             properties:
@@ -155,34 +190,34 @@ paths:
             $ref: '#/definitions/Error'
   /messages/list:
     get:
-      summary: Список сообщений компании
+      summary: List of company messages
       description: |
-        Список сообщений компании с полным содержимым и информацией о клиенте.
+        List of company messages with full content and customer information
       parameters:
         - name: status
           in: query
-          description: Статус сообщения.
+          description: Message status
           required: false
           type: string
         - name: date_from
           in: query
-          description: Запрос сообщений, созданных после указанной даты. Пример - "2015-04-28T12:50:34".
+          description: Query messages created after the specified date. Example - "2015-04-28T12:50:34".
           required: false
           type: string
         - name: date_to
           in: query
-          description: Запрос сообщений, созданных до указанной даты. Пример - "2015-04-28T12:50:34".
+          description: Query messages created before the specified date. Example - "2015-04-28T12:50:34".
           required: false
           type: string
         - name: limit
           in: query
-          description: Ограничение количества сообщений в ответе.
+          description: Limiting the number of messages in a response
           required: false
           type: integer
           format: int64
         - name: last_id
           in: query
-          description: Ограничить выборку сообщений с идентификаторами не выше указанного.
+          description: Limit the selection of messages with IDs not higher than the specified one
           required: false
           type: integer
           format: int64
@@ -190,7 +225,7 @@ paths:
         - Messages
       responses:
         '200':
-          description: Список сообщений
+          description: list of messages
           schema:
             type: object
             properties:
@@ -230,13 +265,13 @@ paths:
             $ref: '#/definitions/Error'
   /messages/set_status:
     post:
-      summary: Смена статуса сообщения (-ий).
+      summary: Change the status of the message(s)
       description: |
-        Изменение статуса сообщений по списку уникальных идентификаторов.
+        Changing the status of messages according to the list of unique identifiers
       parameters:
         - name: body
           in: body
-          description: Параметры запроса.
+          description: Request parameters
           required: true
           schema:
             $ref: '#/definitions/SetMessageStatus'
@@ -244,7 +279,7 @@ paths:
         - Messages
       responses:
         '200':
-          description: Список идентификаторов обработанных сообщений.
+          description: List of IDs of processed messages
           schema:
             type: object
             properties:
@@ -496,14 +531,73 @@ paths:
           description: unexpected error
           schema:
             $ref: '#/definitions/ProductEditError'
-  /products/import_url:
+  /products/edit(region):
     post:
-      summary: Импорт товаров
-      description: Импорт товаров с помощью ссылки на xls,csv,xlsx,xml,cml файл.
+      summary: Product editing
+      description: |
+        Editing region of a product
       parameters:
         - name: body
           in: body
-          description: Параметры запроса.
+          description: Request parameters
+          required: true
+          schema:
+            $ref: '#/definitions/ProductEdit'
+      tags:
+        - Products
+      responses:
+        '200':
+          description: List of IDs of processed messages and errors
+          schema:
+            type: object
+            properties:
+              processed_ids:
+                type: array
+                items:
+                  type: integer
+                  format: int64
+              errors:
+                type: object
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ProductEditError'
+  /products/list/delete:
+    delete:
+      summary: Company product list
+      description: |
+        Deleting company product list.
+      tags:
+        - Products
+      parameters:
+        - name: limit
+          in: query
+          description: Limiting the number of items in the response.
+          type: integer
+        - name: last_id
+          in: query
+          description: Limit the selection of products with id not higher.
+          type: integer
+        - name: group_id
+          in: query
+          description: Group id. Default - company root group Id.
+          type: integer
+      responses:
+        '204':
+          description: No Content
+          # schema:
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /products/import_url:
+    post:
+      summary: Products import
+      description: Import of products using a link to xls,csv,xlsx,xml,cml file
+      parameters:
+        - name: body
+          in: body
+          description: Request parameters
           required: true
           schema:
             $ref: '#/definitions/ImportProductURL'
@@ -511,14 +605,14 @@ paths:
         - Products
       responses:
         '200':
-          description: Идентификатор процесса, позволяющий увидеть состояние импорта на разных этапах
+          description: Process id that allows you to see the import status at different stages
           schema:
             type: object
             properties:
               id:
                 type: string
               status:
-                description: Статус импорта на этапе валидации входных параметров
+                description: Import status at the stage of validation of input parameters
                 type: string
                 enum:
                   - success
@@ -572,12 +666,12 @@ paths:
                 type: string
   /products/import/status/{id}:
     get:
-      summary: Статус импорта
-      description: Проверка состояния импорта товаров.
+      summary: Import status
+      description: Check of the products import status
       parameters:
         - name: id
           in: path
-          description: ID процесса импорта.
+          description: ID import process
           required: true
           type: integer
           format: int64
@@ -585,7 +679,7 @@ paths:
         - Products
       responses:
         '200':
-          description: Информация о состоянии импорта
+          description: Import process information
           schema:
             $ref: '#/definitions/ImportProductStatus'
         default:
@@ -597,21 +691,101 @@ paths:
                 type: string
               message:
                 type: string
+  /products/edit_name:
+    put:
+      summary: Edit product name
+      # produces: application/json
+      parameters: 
+        - name: Body
+          in: body
+          description: Product data to edit name
+          required: true
+          schema:
+           type: array
+           items: 
+            type: object
+            properties:
+              Product_Id: 
+                description: Product_ID to change the name
+                type: integer
+                format: int64
+              New_Name: 
+                description: New product name
+                type: string
+                maxLength: 100
+      tags:
+        - Products
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: object
+            properties: 
+              processed_id: 
+                type: array
+                items:
+                  type: integer
+                  format: int64
+              errors:
+                type: object
+        '404':
+          description: Invalid ID supplied
+          schema:
+            type: object
+            properties:
+              errors:
+                type: object
+  /products/delete:
+    delete:
+      summary: Delete a product by ID
+      operationId: DeleteProductByID
+      # produces: application/json
+      parameters:
+        - name: Product_ID
+          in: query
+          description: Product ID to delete
+          required: true
+          type: integer
+          format: int64
+      tags:
+        - Products
+      responses:
+        '200':
+          description: OK
+          schema: 
+              type: object
+              properties:
+                processed_id:
+                  type: object
+                  items: 
+                    type: integer
+                    format: int64
+                status:
+                  type: string
+                errors:
+                  type: object
+        '404':
+          description: Invalid ID supplied
+          schema: 
+              type: object
+              properties: 
+                errors: 
+                  type: object
   /groups/list:
     get:
-      summary: Список груп компании
+      summary: List of company groups
       description: |
-        Список груп компании.
+        List of company groups
       parameters:
         - name: limit
           in: query
-          description: Ограничение количества груп в ответе.
+          description: Limiting the number of groups in response
           required: false
           type: integer
           format: int64
         - name: last_id
           in: query
-          description: Ограничить выборку груп с идентификаторами не выше указанного.
+          description: Restrict the selection of groups with ID not higher than the specified one
           required: false
           type: integer
           format: int64
@@ -619,7 +793,7 @@ paths:
         - Groups
       responses:
         '200':
-          description: Список груп
+          description: List of groups
           schema:
             type: object
             properties:
@@ -631,6 +805,54 @@ paths:
           description: unexpected error
           schema:
             $ref: '#/definitions/Error'
+  /groups/{id}:
+    get:
+      summary: Information about group
+      description: |
+       Information about group by ID.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+          format: int64
+      tags:
+        - Groups
+      responses:
+        '200':
+          description: information about group
+          schema:
+            type: object
+            properties:
+              order:
+                $ref: '#/definitions/Group'
+        '404':
+          description: Not found
+          schema:
+            $ref: '#/definitions/Error'
+  /groups/delete/{id}:
+    delete:
+      summary: Deleting group
+      description: |
+        Deleting group by ID.
+      parameters:
+        - name: id
+          in: path
+          description: Unknown.
+          required: true
+          type: integer
+          format: int64
+      tags:
+        - Groups
+      responses:
+        '200':
+          description: Successfully deleted
+          schema:
+            $ref: '#/definitions/Group'
+        '404':
+          description: Not found
+          schema:
+            $ref: '#/definitions/Error'  
   /payment_options/list:
     get:
       summary: Список способов оплаты компании.
@@ -698,88 +920,96 @@ paths:
                 type: object
                 example:
                   declaration_id: Номер декларации должен состоять из цифр
+  /groups/translation/{id}:
+    get:
+      summary: Translation of the group
+      description: Information about translation of the group
+      parameters:
+        - name: id
+          in: path
+          description: Group id
+          required: true
+          type: string
+        - name: lang
+          in: query
+          description: Target language
+          required: false
+          type: string
+      tags:
+        - GroupTranslation
+      responses:
+        '200':
+          description: Successful operation
+          schema:
+            # type: application/json
+            properties:
+              orders:
+                type: object
+                items: 
+                  $ref: '#/definitions/GroupTranslation'
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/GroupTranslationError'
 definitions:
+  Notifications:
+    properties:
+      notificationId:
+        type: integer
+        description: Unique notification id.
+      status:
+        type: string
+        description: Types of notifications. 
+        example: importing, eshop, portal_moderation, exporting
+
   Order:
     properties:
       id:
         type: integer
-        description: Уникальный идентификатор заказа.
+        description: The unique identifier for the order
       date_created:
         type: string
-        description: Дата создания заказа в формате ISO-8601. Пример - "2015-04-28T12:50:34.588791+00:00"
+        description: The date the order was created in ISO-8601 format. Example - "2015-04-28T12:50:34.588791+00:00"
+      date_modified:
+        type: string
+        description: The date the order was updated in ISO-8601 format. Example - "2015-04-28T12:50:34.588791+00:00"
       client_first_name:
         type: string
-        description: Имя клиента.
+        description: Name of the customer
       client_second_name:
         type: string
-        description: Отчество клиента
+        description: Middle name of the customer
       client_last_name:
         type: string
-        description: Фамилия клиента.
+        description: Last name of the customer
       client_id:
         type: integer
-        description: Уникальный идентификатор клиента
+        description: The unique identifier for the customer
         example: 12345
-      client_notes:
-        type: string
-        description: Добавленный пользователем комментарий.
-      products:
-        type: array
-        items:
-          type: object
-          properties:
-            id:
-              type: integer
-              description: Уникальный идентификатор товара.
-            external_id:
-              type: string
-              description: Уникальный идентификатор (внешней системы) товара.
-            image:
-              type: string
-              description: Ссылка на изображение.
-            quantity:
-              type: number
-              format: float
-              description: Количество единиц товара в заказе.
-            price:
-              type: string
-              description: Цена товара за единицу.
-            url:
-              type: string
-              description: Ссылка на товар на сайте компании.
-            name:
-              type: string
-              description: Название товара.
-            total_price:
-              type: string
-              description: Сумма заказа.
-            measure_unit:
-              type: string
-              description: Единица измерения.
-            sku:
-              type: string
-              description: Код (артикул) товара.
-      phone:
-        type: string
-        description: Телефон клиента.
       email:
         type: string
-        description: Email клиента.
-      price:
+        description: E-mail of the customer
+      phone:
         type: string
-        description: Сумма заказа.
+        description: Сustomer phone number
       delivery_option:
         type: object
         properties:
           id:
             type: integer
-            description: Уникальный идентификатор способа доставки.
+            description: Unique shipping method identifier
           name:
             type: string
-            description: Название способа доставки.
+            description: The name of the shipping method
+          shipping_service:
+            type: string
+            description: Shipping service
+      delivery_address:
+        type: string
+        description: Delivery address
       delivery_provider_data:
         type: object
-        description: Данные провайдера доставки, связанные с заказом. Если в заказе выбран способ доставки, который не входит в список поддерживаемых (см. поле 'provider' ниже), обьект будет null
+        description: Delivery provider data associated with the order. If a delivery method is selected in the order that is not included in the list of supported ones (see the 'provider' field below), the object will be null
         properties:
           provider:
             type: string
@@ -788,7 +1018,7 @@ definitions:
               - justin
               - delivery_auto
               - ukrposhta
-            description: Идентификатор провайдера доставки.
+            description: Delivery provider ID
           type:
             type: string
             enum:
@@ -796,44 +1026,44 @@ definitions:
               - W2D
               - D2W
               - D2D
-            description: Идентификатор типа доставки, где буква W - отделение, D - курьер. Соответственно, W2D - отправка с отделения, получение курьером.
+            description: Identifier of the type of delivery, where the letter W is a department, D is a courier. Accordingly, W2D - sending from the office, receiving by courier.
           sender_warehouse_id:
             type: string
-            description: Идентификатор отделения отправки в системе провайдера доставки (У Укрпочты - индекс отделения). null если отправка не с отделения.
+            description: Identifier of the receiving department in the system of the delivery provider (U Ukrposhta - department index). null if the delivery is not to a branch
           recipient_warehouse_id:
             type: string
-            description: Идентификатор отделения получения в системе провайдера доставки (У Укрпочты - индекс отделения). null если доставка не в отделение.
+            description: Identifier of the receiving department in the system of the delivery provider (U Ukrposhta - department index). null if the delivery is not to a branch
           declaration_number:
             type: string
-            description: Номер накладной в системе провайдера доставки
-      delivery_address:
-        type: string
-        description: Адрес доставки.
+            description: Invoice number in the delivery provider's system
+      delivery_cost:
+        type: integer
+        description: Cost of delivery
       payment_option:
         type: object
         properties:
           id:
             type: integer
-            description: Уникальный идентификатор способа оплаты.
+            description: The unique identifier for the payment method
           name:
             type: string
-            description: Название способа оплаты.
+            description: The name of the payment method
       payment_data:
         type: object
         properties:
           type:
             type: string
-            description: Способ оплаты
+            description: Payment method
             enum:
               - evopay
           status:
             type: string
             description: |-
               Статус оплаты: 
-              * `paid` - оплачено покупателем
-              * `unpaid` - не оплачено
-              * `refunded` - выполнен возврат покупателю
-              * `paid_out` - выплачено продавцу
+              * `paid` - paid by the buyer
+              * `unpaid` - not paid
+              * `refunded` - refunded to the buyer
+              * `paid_out` - paid to the seller
             enum:
               - paid
               - unpaid
@@ -841,10 +1071,66 @@ definitions:
               - paid_out
           status_modified:
             type: string
-            description: Дата последнего изменения статуса оплаты, в формате ISO-8601. Пример - "2015-04-28T12:50:34.588791+00:00"
+            description: The date the payment status was last changed, in ISO-8601 format. Example - "2015-04-28T12:50:34.588791+00:00"
+      price:
+        type: string
+        description: Order price
+      full_price:
+        type: string
+        description: The total cost of the order
+      client_notes:
+        type: string
+        description: User-added comment
+      products:
+        # type: array
+        # items:
+        #   type: object
+          properties:
+            id:
+              type: integer
+              description: The unique identifier of the item
+            external_id:
+              type: string
+              description: The unique (external system) identifier of the item
+            name:
+              type: string
+              description: Product Name
+            name_multilang:
+              type: object
+              properties:
+                ru:
+                  type: string
+                uk:
+                  type: string
+            sku:
+              type: string
+              description: Product code (article)
+            price:
+              type: string
+              description: Item price per unit
+            quantity:
+              type: number
+              format: float
+              description: The number of items in the order
+            measure_unit:
+              type: string
+              description: Unit of measurement
+            image:
+              type: string
+              description: Link to image
+            url:
+              type: string
+              description: Link to the product on the company's website
+            total_price:
+              type: string
+              description: Order price
+            cpa_commission:
+              properties:
+                amount:
+                  type: string
       status:
         type: string
-        description: Статус заказа.
+        description: Order status
         enum:
           - pending
           - received
@@ -852,15 +1138,57 @@ definitions:
           - canceled
           - draft
           - paid
+      status_name:
+        type: string
+        description: Order status
+        enum:
+          - новый
+          - принят
+          - исполнен
+          - отменен
+          - оплачен
       source:
         type: string
-        description: Источник заказа
+        description: Order source
         enum:
           - portal
           - company_site
           - company_cabinet
           - mobile_app
           - bigl
+  SetOrderStatus:
+    properties:
+      status:
+        description: Order status
+        type: string
+        enum:
+          - pending
+          - received
+          - delivered
+          - canceled
+          - draft
+          - paid
+      ids:
+        description: List of unique identifiers
+        type: array
+        items:
+          type: integer
+          format: int64
+      cancellation_reason:
+        description: Reason for canceling the order (Only for "canceled" status)
+        type: string
+        enum:
+          - not_available
+          - price_changed
+          - buyers_request
+          - not_enough_fields
+          - duplicate
+          - invalid_phone_number
+          - less_than_minimal_price
+          - another
+      cancellation_text:
+        description: Message for the reason for canceling the order (Only for "canceled" status). Mandatory if "cancellation_reason" is "price_changed", "not_enough_fields", or "another"
+        type: string
   Message:
     properties:
       id:
@@ -1290,39 +1618,6 @@ definitions:
         items:
           type: integer
           format: int64
-  SetOrderStatus:
-    properties:
-      status:
-        description: Статус заказа.
-        type: string
-        enum:
-          - pending
-          - received
-          - delivered
-          - canceled
-          - draft
-          - paid
-      ids:
-        description: Список уникальных идентификаторов.
-        type: array
-        items:
-          type: integer
-          format: int64
-      cancellation_reason:
-        description: Причина отмены заказа (Только для статуса "canceled").
-        type: string
-        enum:
-          - not_available
-          - price_changed
-          - buyers_request
-          - not_enough_fields
-          - duplicate
-          - invalid_phone_number
-          - less_than_minimal_price
-          - another
-      cancellation_text:
-        description: Сообщение для причины отмены заказа (Только для статуса "canceled"). Обязательно в случае, если "cancellation_reason" имеет значение "price_changed", "not_enough_fields" или "another"
-        type: string
   PaymentRefund:
     properties:
       ids:
@@ -1508,7 +1803,7 @@ definitions:
   Error:
     properties:
       error:
-        description: Ошибка при выполнении запроса.
+        description: An error occurred while executing the request.
         type: string
   ProductEditError:
     properties:
@@ -1520,3 +1815,25 @@ definitions:
         items:
           type: integer
           format: int64
+  GroupTranslation:
+    # required: 
+    #   name: true
+    #   photoUrls: true
+    properties:
+      name:
+        type: string
+        example: string
+      photoUrls:
+        type: string
+        example: string
+  GroupTranslationError:
+    properties:
+      error:
+        type: string
+        example: Unexpected error message
+securityDefinitions:
+  Bearer:
+    type: apiKey
+    description: Get JWT token from Auth API and paste it
+    name: Authorization
+    in: header

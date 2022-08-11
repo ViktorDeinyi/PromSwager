@@ -4,22 +4,25 @@ info:
    This is our group KH-067-QA-02 demo project for testing API [prom.ua](https://rabota.ua).
    
    For this demo project you can use the api key `bearer-token` to test the API.
-  version: 1.1.0
+  version: 1.2.0
   title: Prom.ua Web OpenAPI
 schemes:
   - https
-host: my.prom.ua/api/v1
+host: my.prom.ua
+basePath: /api/v1
+# produces:
+#   - application/json
 tags:
   - name: Notifications
     description: (operations with notifications)
   - name: Orders
     description: (order operations)
   - name: Products
-    description: (операции с продуктами)
+    description: (operations with products)
   - name: Clients
-    description: (операции с клиентами)
+    description: (client operations)
   - name: Messages
-    description: (операции c сообщениями)
+    description: (operations with messages)
   - name: Groups
     description: (операции c группами)
   - name: PaymentOption
@@ -239,13 +242,13 @@ paths:
             $ref: '#/definitions/Error'
   /messages/{id}:
     get:
-      summary: Информация о сообщении
+      summary: Information about message
       description: |
-        Информация о сообщении с указанным идентификатором.
+        Information about message with specified identifier
       parameters:
         - name: id
           in: path
-          description: Уникальный идентификатор сообщения.
+          description: Unique message identifier
           required: true
           type: integer
           format: int64
@@ -253,7 +256,7 @@ paths:
         - Messages
       responses:
         '200':
-          description: Информация о сообщении
+          description: Information about message
           schema:
             type: object
             properties:
@@ -294,20 +297,20 @@ paths:
             $ref: '#/definitions/Error'
   /messages/reply:
     post:
-      summary: Ответ на сообщение.
+      summary: Message reply
       description: |
-        Отправка ответа на сообщение от клиента с указанным идентификатором.
+        Sending a response to a client message with specified identifier
       parameters:
         - name: body
           in: body
-          description: Параметры запроса.
+          description: Request parameters
           schema:
             $ref: '#/definitions/MessageReply'
       tags:
         - Messages
       responses:
         '200':
-          description: Идентификатор сообщения, на которое был отправлен ответ.
+          description: ID of the message to which was sent the reply
           schema:
             type: object
             properties:
@@ -359,13 +362,13 @@ paths:
             $ref: '#/definitions/Error'
   /clients/{id}:
     get:
-      summary: Информация о клиенте
+      summary: Information about client
       description: |
-        Информация о клиенте с указанным идентификатором.
+        Information about the client with the specified ID
       parameters:
         - name: id
           in: path
-          description: Уникальный идентификатор клиента.
+          description: The unique identifier for the order
           required: true
           type: integer
           format: int64
@@ -373,7 +376,7 @@ paths:
         - Clients
       responses:
         '200':
-          description: Информация о клиенте
+          description: Information about client
           schema:
             type: object
             properties:
@@ -422,20 +425,20 @@ paths:
             $ref: '#/definitions/Error'
   /products/{id}:
     get:
-      summary: Информация о товаре
+      summary: Information about the product
       description: |
-        Информация о товаре с указанным идентификатором.
+        Information about the product by ID
       tags:
         - Products
       parameters:
         - name: id
           in: path
-          description: Уникальный идентификатор товара.
+          description: Unique product ID
           required: true
           type: integer
       responses:
         '200':
-          description: Информация о товаре
+          description: Information about the product
           schema:
             properties:
               product:
@@ -469,37 +472,35 @@ paths:
           description: unexpected error
           schema:
             $ref: '#/definitions/Error'
-  /products/edit:
-    post:
-      summary: Редактирование товаров.
+  /products/translation:
+    put:
+      summary: Product translation
       description: |
-        Редактирование списка товаров.
+        Translation of the name, description and keywords of the product
       parameters:
         - name: body
           in: body
-          description: Параметры запроса.
+          description: Request parameters
           required: true
           schema:
-            $ref: '#/definitions/ProductEdit'
+            $ref: '#/definitions/ProductTranslation'
       tags:
         - Products
       responses:
         '200':
-          description: Список идентификаторов обработанных сообщений и ошибок.
+          description: Status of submitted changes
           schema:
             type: object
             properties:
-              processed_ids:
-                type: array
-                items:
-                  type: integer
-                  format: int64
-              errors:
-                type: object
+              status:
+                type: string
+                enum:
+                  - success
+                  - error
         default:
           description: unexpected error
           schema:
-            $ref: '#/definitions/ProductEditError'
+            $ref: '#/definitions/Error'
   /products/edit_by_external_id:
     post:
       summary: Редактирование товаров (по внешнему идентификатору).
@@ -534,34 +535,52 @@ paths:
   /products/edit(region):
     post:
       summary: Product editing
-      description: |
-        Editing region of a product
       parameters:
         - name: body
           in: body
-          description: Request parameters
+          description: Editing region of a product
           required: true
+          # schema:
+          #   $ref: '#/definitions/ProductEdit'
           schema:
-            $ref: '#/definitions/ProductEdit'
+           type: array
+           items: 
+            type: object
+            properties:
+              Product_Id: 
+                description: Product_ID to change the  region
+                type: integer
+                format: int64
+              ru: 
+                description: New product region
+                type: string
+                maxLength: 50
       tags:
         - Products
       responses:
         '200':
-          description: List of IDs of processed messages and errors
+          description: OK
           schema:
             type: object
             properties:
-              processed_ids:
+              processed_id:
                 type: array
                 items:
                   type: integer
                   format: int64
               errors:
                 type: object
-        default:
-          description: unexpected error
+        '404':
+          description: Invalid ID supplied
           schema:
-            $ref: '#/definitions/ProductEditError'
+            type: object
+            properties:
+              errors:
+                type: object
+        # default:
+        #   description: unexpected error
+        #   schema:
+        #     $ref: '#/definitions/ProductEditError'
   /products/list/delete:
     delete:
       summary: Company product list
@@ -628,14 +647,14 @@ paths:
                 type: string
   /products/import_file:
     post:
-      summary: Импорт товаров
-      description: Импорт товаров с помощью xls,csv,xlsx,xml,cml файла.
+      summary: Product import
+      description: Product import by xls,csv,xlsx,xml,cml files.
       consumes:
         - ''
       parameters:
         - name: body
           in: body
-          description: Параметры запроса.
+          description: Request parameters
           required: true
           schema:
             $ref: '#/definitions/ImportProductWithFile'
@@ -643,14 +662,14 @@ paths:
         - Products
       responses:
         '200':
-          description: Идентификатор процесса, позволяющий увидеть состояние импорта на разных этапах
+          description: Process identificator, which permits to check the import status on the different stages
           schema:
             type: object
             properties:
               id:
                 type: string
               status:
-                description: Статус импорта на этапе валидации входных параметров
+                description: Import status on the stage of valid initial parameters
                 type: string
                 enum:
                   - success
@@ -942,10 +961,10 @@ paths:
           description: Successful operation
           schema:
             # type: application/json
-            properties:
-              orders:
-                type: object
-                items: 
+            # properties:
+            #   orders:
+            #     type: object
+            #     items: 
                   $ref: '#/definitions/GroupTranslation'
         default:
           description: unexpected error
@@ -1193,32 +1212,32 @@ definitions:
     properties:
       id:
         type: integer
-        description: Уникальный идентификатор сообщения.
+        description: The unique ID of the message
       date_created:
         type: string
-        description: Дата создания сообщения в формате ISO-8601. Пример - "2015-04-28T12:50:34.588791+00:00"
-      client_full_name:
-        type: string
-        description: ФИО клиента.
-      phone:
-        type: string
-        description: Телефон клиента.
-      message:
-        type: string
-        description: Текст сообщения.
+        description: The date the message was created in ISO-8601 format. Example - "2015-04-28T12:50:34.588791+00:00"
       subject:
         type: string
-        description: Тема сообщения.
+        description: Message subject
+      message:
+        type: string
+        description: Message text
+      client_full_name:
+        type: string
+        description: Name of the client
       status:
         type: string
-        description: Статус сообщения.
+        description: Message status
         enum:
           - unread
           - read
           - deleted
+      phone:
+        type: string
+        description: Client phone
       product_id:
         type: integer
-        description: Уникальный идентификатор товара.
+        description: The unique identifier of the item
   Client:
     properties:
       id:
@@ -1411,19 +1430,19 @@ definitions:
     properties:
       id:
         type: integer
-        description: Уникальный идентификатор группы.
+        description: Unique group ID
       name:
         type: string
-        description: Название группы.
+        description: Group name
       description:
         type: string
-        description: Описание группы.
+        description: Group description
       image:
         type: string
-        description: Ссылка на изображение группы.
+        description: Link to group image
       parent_group_id:
         type: integer
-        description: Идентификатор родительской группы.
+        description: Parent group ID
   PaymentOption:
     properties:
       id:
@@ -1435,84 +1454,24 @@ definitions:
       description:
         type: string
         description: Описание способа оплаты.
-  ProductEdit:
-    type: array
-    items:
-      type: object
-      required:
-        - id
-      properties:
-        id:
-          description: Уникальный идентификатор товара.
+  ProductTranslation:
+    properties:
+        product_id:
+          description: Unique product identifier
           type: integer
           format: int64
-        presence:
-          description: Наличие товара.
+        lang:
+          description: Translation language ("uk")
           type: string
-          enum:
-            - available
-            - not_available
-            - order
-            - waiting
-        presence_sure:
-          description: Статус «Гарантия наличия».
-          type: boolean
-        price:
-          description: Цена товара.
-          type: number
-          format: float
-          minimum: 0.00001
-        status:
-          description: Статус сообщения.
-          type: string
-          enum:
-            - on_display
-            - draft
-            - deleted
-            - not_on_display
-        prices:
-          description: Сетка оптовых цен.
-          type: array
-          items:
-            type: object
-            properties:
-              price:
-                type: number
-                format: float
-              minimum_order_quantity:
-                type: number
-                format: float
-        discount:
-          description: Скидка
-          type: object
-          properties:
-            value:
-              type: number
-              description: Установленное значение скидки
-            type:
-              type: string
-              description: Тип скидки (абсолютное значение/процент)
-              enum:
-                - amount
-                - percent
-            date_start:
-              type: string
-              description: Дата начала периода скидок ДД.ММ.ГГГГ
-            date_end:
-              type: string
-              description: Дата окончания периода скидок ДД.ММ.ГГГГ
         name:
-          description: Название товара.
+          description: Translated product name
           type: string
-          maxLength: 150
         keywords:
-          description: Строка ключевых слов (разделитель запятая пробел ', ').
+          description: Translated product keewords
           type: string
-          maxLength: 1024
         description:
-          description: Описание товара (может содержать html теги).
+          description: Translated product description
           type: string
-          maxLength: 50000
   ProductEditByExternalId:
     type: array
     items:
@@ -1597,23 +1556,24 @@ definitions:
   MessageReply:
     properties:
       id:
-        description: Идентификатор сообщения.
+        description: Message identifier
         type: integer
         format: int64
       message:
-        description: Текст сообщения. Ограничение - 1000 символов.
+        description: Message text
         type: string
+        maxLength: 1000
   SetMessageStatus:
     properties:
       status:
-        description: Статус сообщения.
+        description: Message status
         type: string
         enum:
           - unread
           - read
           - deleted
       ids:
-        description: Список уникальных идентификаторов.
+        description: List of unique identifiers
         type: array
         items:
           type: integer

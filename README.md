@@ -14,3 +14,7 @@ Annnet  - 11.08 [change post/products/edit/(region)]
 Sofia   - 11.08 [change get/clients/{id}]       
 Di      - 11.08 [transl model Message +SetMessageStatus]        
 Viktor  - 11.08  [add put/products/translation (+model ProductTranslation), change post//messages/reply (+model MessageReply), change get/messages/{id}]        
+        *-Version 1.3*  
+Annnet  - 13.08 [change delete/products/list/delete]		
+Dana    - 13.08 [transl model ImportProductWithFile, transl model ProductEditError , transl model Product]	
+Tanya   - 13.08 [transl model ImportProductURL, transl model ImportProductStatus, +++ TRANSL ALL OTHER]	

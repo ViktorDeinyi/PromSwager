@@ -1800,9 +1800,9 @@ definitions:
       error:
         type: string
         example: Unexpected error message
-# securityDefinitions:
-#   Bearer:
-#     type: apiKey
-#     description: Get JWT token from Auth API and paste it
-#     name: Authorization
-#     in: header
+securityDefinitions:
+  Bearer:
+    type: apiKey
+    description: Get JWT token from Auth API and paste it
+    name: Authorization
+    in: header
